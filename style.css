@@ -1,0 +1,35 @@
+:root {
+    --primary: #064e3b; --gold: #d4af37; --bg: #fdfcf0; --text: #1a1a1a; --card: #ffffff;
+}
+body.dark {
+    --bg: #121212; --text: #e0e0e0; --card: #1e1e1e;
+}
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: 0.3s; }
+.hidden { display: none !important; }
+
+/* Selection Screen */
+#home-screen {
+    height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1584281723351-90bd505c1ba3?q=80');
+    background-size: cover; display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+}
+.mode-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-top: 30px; }
+.mode-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; border: 1px solid var(--gold); width: 160px; cursor: pointer; transition: 0.3s; }
+.mode-card:hover { background: var(--gold); color: #000; }
+
+/* Sidebar */
+.side-panel { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: var(--primary); color: white; padding: 20px; transition: 0.3s; z-index: 2000; }
+.side-panel.active { left: 0; }
+.close-btn { background: none; border: none; color: white; font-size: 30px; cursor: pointer; float: right; }
+
+/* Navbar */
+.navbar { background: var(--primary); color: white; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+.tabs button { background: none; border: 1px solid white; color: white; padding: 5px 10px; cursor: pointer; }
+.tabs button.active { background: var(--gold); color: black; }
+
+/* Quran Viewer */
+.grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
+.surah-card { background: var(--card); padding: 20px; border-radius: 10px; cursor: pointer; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--text); }
+.ayah-box { background: var(--card); margin: 15px auto; padding: 25px; max-width: 800px; border-radius: 12px; direction: rtl; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.arabic-txt { font-family: 'Amiri'; font-size: 30px; line-height: 2; margin-bottom: 15px; }
+.urdu-txt { font-family: 'Noto Nastaliq Urdu'; font-size: 18px; color: var(--primary); border-top: 1px solid #eee; padding-top: 10px; }
+.tafseer-detail { margin-top: 10px; font-size: 14px; background: #f9f9f9; padding: 10px; border-radius: 5px; color: #444; }
