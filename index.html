@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Quran Pro Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <div id="side-tools" class="side-panel">
+        <button onclick="togglePanel()" class="close-btn">×</button>
+        <h3><i class="fas fa-clock"></i> Prayer Times</h3>
+        <div id="prayer-times">Location access required...</div>
+        <hr>
+        <h3><i class="fas fa-compass"></i> Qibla</h3>
+        <p id="qibla-dir">Fetching...</p>
+    </div>
+
+    <div id="home-screen" class="screen">
+        <div class="overlay">
+            <div class="top-nav">
+                <button onclick="togglePanel()" class="tool-btn"><i class="fas fa-bars"></i> Tools</button>
+                <button id="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            </div>
+            <h1>AL-QURAN <span class="gold">ULTIMATE</span></h1>
+            <p>The Complete Islamic Portal</p>
+            
+            <div class="mode-container">
+                <div class="mode-card" onclick="startApp('15line-urdu')"><i class="fas fa-book-open"></i><h3>15 Line Urdu</h3></div>
+                <div class="mode-card" onclick="startApp('15line-arabic')"><i class="fas fa-mosque"></i><h3>15 Line Arabic</h3></div>
+                <div class="mode-card" onclick="startApp('api-urdu')"><i class="fas fa-language"></i><h3>Urdu + Tafseer</h3></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <nav class="navbar">
+            <button onclick="goHome()" class="nav-btn"><i class="fas fa-home"></i> Menu</button>
+            <div class="qari-selector">
+                <select id="audio-reciter" onchange="updateReciter()">
+                    <option value="ar.alafasy">Mishary Alafasy</option>
+                    <option value="ar.abdulbasitmurattal">Abdul Basit</option>
+                    <option value="ar.sudais">Sudais</option>
+                </select>
+            </div>
+            <div class="tabs">
+                <button onclick="switchTab('surah')" id="tab-surah" class="active">Surah</button>
+                <button onclick="switchTab('juz')" id="tab-juz">Para</button>
+            </div>
+        </nav>
+
+        <div id="surah-list" class="grid-container"></div>
+        <div id="juz-list" class="grid-container hidden"></div>
+        
+        <div id="viewer-section" class="hidden">
+            <div class="viewer-header">
+                <button onclick="backToList()" class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                <h2 id="current-title"></h2>
+            </div>
+            <div id="content-area"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
