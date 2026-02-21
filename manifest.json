@@ -1,0 +1,16 @@
+{
+  "name": "Quran Website Pro",
+  "short_name": "QuranWeb",
+  "description": "My first professional Quran website with Tafseer and Prayer Times",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2704/2704179.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
