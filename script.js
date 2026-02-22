@@ -1,16 +1,14 @@
 let currentMode = '';
 let currentReciter = 'ar.alafasy';
 
+// PWA Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
     });
 }
 
-function toggleTheme() {
-    document.body.classList.toggle('dark');
-}
-
+function toggleTheme() { document.body.classList.toggle('dark'); }
 function togglePanel() {
     const panel = document.getElementById('side-tools');
     panel.classList.toggle('active');
@@ -62,44 +60,72 @@ async function loadContent(id, name) {
     area.innerHTML = '<div style="text-align:center; padding:20px;">Quran Pak load ho raha hai...</div>';
 
     if(currentMode.includes('15line')) {
-        // --- Digital 15-Line Coding Solution ---
+        // --- 15 Line Page Logic ---
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`);
         const data = await res.json();
+        const ayahs = data.data.ayahs;
         
-        // CSS for 15-line look
-        let style = `
+        let pagesHtml = '';
+        let currentAyahs = [];
+        
+        // Har 15 ayats ko ek "Page" mein divide karna
+        for (let i = 0; i < ayahs.length; i++) {
+            currentAyahs.push(ayahs[i]);
+            if (currentAyahs.length === 15 || i === ayahs.length - 1) {
+                pagesHtml += `
+                    <div class="mushaf-page">
+                        <div class="mushaf-content">
+                            ${currentAyahs.map(a => `${a.text} <span class="ayah-num">${a.numberInSurah}</span>`).join(' ')}
+                        </div>
+                        <div class="page-footer">Page Ends Here</div>
+                    </div>
+                `;
+                currentAyahs = [];
+            }
+        }
+
+        area.innerHTML = `
             <style>
-                .mushaf-container {
+                .mushaf-page {
                     background: #fff9e6;
                     color: #000;
-                    padding: 30px 20px;
-                    border: 15px solid #064e3b;
-                    border-radius: 10px;
-                    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-                    font-family: 'Amiri', serif;
-                    line-height: 2.5;
-                    text-align: center;
-                    font-size: 24px;
-                    word-spacing: 5px;
+                    margin: 20px auto;
+                    padding: 40px;
+                    max-width: 800px;
+                    min-height: 1000px; /* Asli page jaisi feel */
+                    border: 12px double #064e3b;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    position: relative;
                     direction: rtl;
                 }
+                .mushaf-content {
+                    font-family: 'Amiri', serif;
+                    font-size: 26px;
+                    line-height: 2.2;
+                    text-align: justify;
+                }
+                .page-footer {
+                    position: absolute;
+                    bottom: 10px;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #064e3b;
+                    border-top: 1px solid #d4af37;
+                    padding-top: 5px;
+                }
                 .ayah-num {
-                    display: inline-block;
-                    width: 30px;
-                    height: 30px;
+                    color: #d4af37;
+                    font-size: 18px;
+                    margin: 0 5px;
                     border: 1px solid #d4af37;
                     border-radius: 50%;
-                    font-size: 14px;
-                    line-height: 30px;
-                    margin: 0 5px;
-                    color: #d4af37;
+                    padding: 2px 6px;
                 }
             </style>
+            ${pagesHtml}
         `;
-
-        let content = data.data.ayahs.map(a => `${a.text} <span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
-        
-        area.innerHTML = style + `<div class="mushaf-container">${content}</div>`;
         
     } else {
         // --- Urdu + Tafseer Mode (UNCHANGED) ---
