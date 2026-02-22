@@ -1,7 +1,9 @@
 let currentMode = '';
 let currentReciter = 'ar.alafasy';
 
-// PWA Registration
+// Para Names in Urdu/Arabic
+const juzNames = ["آلم (1)", "سیقول (2)", "تلك الرسل (3)", "لن تنالوا (4)", "والمحصنت (5)", "لا یحب اللہ (6)", "و اذا سمعوا (7)", "ولو اننا (8)", "قال الملا (9)", "واعلموا (10)", "یعتذرون (11)", "وما من دابة (12)", "وما ابری (13)", "ربما (14)", "سبحن الذی (15)", "قال الم الم (16)", "اقترب للناس (17)", "قد افلح (18)", "وقال الذین (19)", "امن خلق (20)", "اتل ما اوحی (21)", "ومن یقنت (22)", "وما لی (23)", "فمن اظلم (24)", "الیہ یرد (25)", "حم (26)", "قال فما خطبکم (27)", "قد سمع اللہ (28)", "تبارك الذی (29)", "عم (30)"];
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
@@ -21,7 +23,7 @@ async function getPrayerTimes() {
         const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`);
         const data = await res.json();
         const t = data.data.timings;
-        document.getElementById('prayer-times').innerHTML = `Fajr: ${t.Fajr}<br>Dhuhr: ${t.Dhuhr}<br>Asr: ${t.Asr}<br>Maghrib: ${t.Maghrib}<br>Isha: ${t.Isha}`;
+        document.getElementById('prayer-times').innerHTML = `Fajr: ${t.Fajr}<br>Isha: ${t.Isha}`;
     });
 }
 
@@ -46,7 +48,7 @@ async function fetchSurahList() {
 function fetchJuzList() {
     let html = '';
     for(let i=1; i<=30; i++) {
-        html += `<div class="surah-card" onclick="loadJuz(${i})"><h3>Para ${i}</h3></div>`;
+        html += `<div class="surah-card" onclick="loadJuz(${i})"><h3>${juzNames[i-1]}</h3></div>`;
     }
     document.getElementById('juz-list').innerHTML = html;
 }
@@ -60,22 +62,29 @@ async function loadContent(id, name) {
     area.innerHTML = '<div style="text-align:center; padding:20px;">Quran Pak load ho raha hai...</div>';
 
     if(currentMode.includes('15line')) {
-        // --- 15 Line Page Logic ---
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`);
         const data = await res.json();
         const ayahs = data.data.ayahs;
         
-        let pagesHtml = '';
+        // Surah Header (Name + Bismillah)
+        let surahHeader = `
+            <div class="surah-intro">
+                <div class="surah-title-frame">${name}</div>
+                <div class="bismillah">بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ</div>
+            </div>
+        `;
+
+        let pagesHtml = surahHeader;
         let currentAyahs = [];
         
-        // Har 15 ayats ko ek "Page" mein divide karna
         for (let i = 0; i < ayahs.length; i++) {
             currentAyahs.push(ayahs[i]);
+            // Har 15 ayats par page break
             if (currentAyahs.length === 15 || i === ayahs.length - 1) {
                 pagesHtml += `
                     <div class="mushaf-page">
                         <div class="mushaf-content">
-                            ${currentAyahs.map(a => `${a.text} <span class="ayah-num">${a.numberInSurah}</span>`).join(' ')}
+                            ${currentAyahs.map(a => `${a.text} <span class="ayah-num">﴿${a.numberInSurah}﴾</span>`).join(' ')}
                         </div>
                         <div class="page-footer">Page Ends Here</div>
                     </div>
@@ -86,43 +95,27 @@ async function loadContent(id, name) {
 
         area.innerHTML = `
             <style>
+                .surah-intro { text-align: center; margin-bottom: 30px; }
+                .surah-title-frame { 
+                    display: inline-block; padding: 10px 40px; border: 3px double #d4af37; 
+                    font-size: 30px; font-family: 'Amiri'; color: #064e3b; background: #fff; border-radius: 50px;
+                }
+                .bismillah { font-size: 35px; font-family: 'Amiri'; margin-top: 20px; color: #000; }
                 .mushaf-page {
-                    background: #fff9e6;
-                    color: #000;
-                    margin: 20px auto;
-                    padding: 40px;
-                    max-width: 800px;
-                    min-height: 1000px; /* Asli page jaisi feel */
-                    border: 12px double #064e3b;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                    position: relative;
-                    direction: rtl;
+                    background: #fff; color: #000; margin: 30px auto; padding: 50px 40px;
+                    max-width: 900px; min-height: 800px; border: 1px solid #ccc;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; direction: rtl;
+                    display: flex; flex-direction: column; justify-content: space-between;
                 }
                 .mushaf-content {
-                    font-family: 'Amiri', serif;
-                    font-size: 26px;
-                    line-height: 2.2;
-                    text-align: justify;
+                    font-family: 'Amiri', serif; font-size: 28px; line-height: 2.3;
+                    text-align: justify; text-justify: inter-word; /* This fits text to page width */
                 }
                 .page-footer {
-                    position: absolute;
-                    bottom: 10px;
-                    left: 0;
-                    right: 0;
-                    text-align: center;
-                    font-size: 12px;
-                    color: #064e3b;
-                    border-top: 1px solid #d4af37;
-                    padding-top: 5px;
+                    text-align: center; font-size: 13px; color: #999;
+                    border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px;
                 }
-                .ayah-num {
-                    color: #d4af37;
-                    font-size: 18px;
-                    margin: 0 5px;
-                    border: 1px solid #d4af37;
-                    border-radius: 50%;
-                    padding: 2px 6px;
-                }
+                .ayah-num { color: #d4af37; font-size: 22px; margin-right: 5px; }
             </style>
             ${pagesHtml}
         `;
@@ -152,8 +145,8 @@ async function loadContent(id, name) {
 }
 
 async function loadJuz(id) {
-    startApp('api-urdu');
-    loadContent(id, `Para ${id}`);
+    startApp('api-urdu'); 
+    loadContent(id, juzNames[id-1]);
 }
 
 function switchTab(t) {
