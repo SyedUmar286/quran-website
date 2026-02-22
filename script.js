@@ -1,7 +1,6 @@
 let currentMode = '';
 let currentReciter = 'ar.alafasy';
 
-// PWA Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
@@ -25,7 +24,6 @@ async function getPrayerTimes() {
         const data = await res.json();
         const t = data.data.timings;
         document.getElementById('prayer-times').innerHTML = `Fajr: ${t.Fajr}<br>Dhuhr: ${t.Dhuhr}<br>Asr: ${t.Asr}<br>Maghrib: ${t.Maghrib}<br>Isha: ${t.Isha}`;
-        document.getElementById('qibla-dir').innerText = "Location Found: " + data.data.meta.timezone;
     });
 }
 
@@ -57,30 +55,54 @@ function fetchJuzList() {
 
 async function loadContent(id, name) {
     document.getElementById('surah-list').classList.add('hidden');
+    document.getElementById('juz-list').classList.add('hidden');
     document.getElementById('viewer-section').classList.remove('hidden');
     document.getElementById('current-title').innerText = name;
     const area = document.getElementById('content-area');
-    area.innerHTML = '<div style="text-align:center; padding:20px;">Sabr karein, Quran Pak load ho raha hai...</div>';
+    area.innerHTML = '<div style="text-align:center; padding:20px;">Quran Pak load ho raha hai...</div>';
 
     if(currentMode.includes('15line')) {
-        // --- 100% Working Image Solution (Quran.com Servers) ---
-        // Quran.com provides stable images that don't get blocked.
-        let imgUrl = "";
-        if(currentMode === '15line-urdu') {
-            // Indopak / Urdu Script (15 Lines)
-            imgUrl = `https://android.quran.com/data/zips/images_1500/images_1500/page${String(id + 1).padStart(3, '0')}.png`;
-        } else {
-            // Madani / Arabic Script
-            imgUrl = `https://quran.com/images/quran_mushaf/v2/page${id + 2}.png`;
-        }
+        // --- Digital 15-Line Coding Solution ---
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`);
+        const data = await res.json();
         
-        area.innerHTML = `
-            <div style="text-align:center; background: white; padding: 10px; border-radius: 10px;">
-                <img src="${imgUrl}" style="width:100%; max-width:800px; display:block; margin:auto; filter: contrast(1.1);" 
-                onerror="this.src='https://via.placeholder.com/500x800?text=Please+Check+Internet+Connection'">
-            </div>`;
+        // CSS for 15-line look
+        let style = `
+            <style>
+                .mushaf-container {
+                    background: #fff9e6;
+                    color: #000;
+                    padding: 30px 20px;
+                    border: 15px solid #064e3b;
+                    border-radius: 10px;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+                    font-family: 'Amiri', serif;
+                    line-height: 2.5;
+                    text-align: center;
+                    font-size: 24px;
+                    word-spacing: 5px;
+                    direction: rtl;
+                }
+                .ayah-num {
+                    display: inline-block;
+                    width: 30px;
+                    height: 30px;
+                    border: 1px solid #d4af37;
+                    border-radius: 50%;
+                    font-size: 14px;
+                    line-height: 30px;
+                    margin: 0 5px;
+                    color: #d4af37;
+                }
+            </style>
+        `;
+
+        let content = data.data.ayahs.map(a => `${a.text} <span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
+        
+        area.innerHTML = style + `<div class="mushaf-container">${content}</div>`;
+        
     } else {
-        // --- Urdu + Tafseer Mode (UNCHANGED as per your request) ---
+        // --- Urdu + Tafseer Mode (UNCHANGED) ---
         const [ar, ur, tf, au] = await Promise.all([
             fetch(`https://api.alquran.cloud/v1/surah/${id}`),
             fetch(`https://api.alquran.cloud/v1/surah/${id}/ur.jalandhry`),
