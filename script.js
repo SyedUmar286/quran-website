@@ -63,9 +63,27 @@ async function loadContent(id, name) {
     area.innerHTML = 'Loading...';
 
     if(currentMode.includes('15line')) {
-        let imgUrl = currentMode === '15line-urdu' ? `https://www.searchtruth.org/quran/images2/page-large/page-${id+10}.jpg` : `https://mushaf.me/style/images/mushaf/page/${id+2}.png`;
-        area.innerHTML = `<img src="${imgUrl}" style="width:100%; max-width:700px; display:block; margin:auto;">`;
+        // --- 15 Line Modes Fix ---
+        // Madani pages start from page 2 (Al-Fatiha) to 604. 
+        // Ye logic stable images load karega.
+        let pageNum = id + 1; 
+        let imgUrl = '';
+        
+        if(currentMode === '15line-urdu') {
+            // High quality Pakistani script images
+            imgUrl = `https://archive.org/download/quran-15-lines-pakistani/page_${String(id).padStart(3, '0')}.jpg`;
+        } else {
+            // High quality Madani/Arabic script images
+            imgUrl = `https://everyayah.com/data/quran_pages_png/${id}.png`;
+        }
+        
+        area.innerHTML = `
+            <div style="text-align:center;">
+                <img src="${imgUrl}" style="width:100%; max-width:700px; display:block; margin:auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 5px;" 
+                onerror="this.src='https://via.placeholder.com/400x600?text=Page+Loading+Error'">
+            </div>`;
     } else {
+        // --- Urdu + Tafseer Mode (UNCHANGED) ---
         const [ar, ur, tf, au] = await Promise.all([
             fetch(`https://api.alquran.cloud/v1/surah/${id}`),
             fetch(`https://api.alquran.cloud/v1/surah/${id}/ur.jalandhry`),
@@ -89,7 +107,8 @@ async function loadContent(id, name) {
 }
 
 async function loadJuz(id) {
-    startApp('api-arabic');
+    // Para mode mein bhi Digital Quran chalega
+    startApp('api-urdu'); 
     loadContent(id, `Para ${id}`);
 }
 
