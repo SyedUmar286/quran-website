@@ -35,42 +35,30 @@ async function loadContent(id, name) {
     document.getElementById('viewer-section').classList.remove('hidden');
     document.getElementById('current-title').innerText = name;
     const area = document.getElementById('content-area');
-    area.innerHTML = '<div style="text-align:center; padding:20px;">Har Ayat ko uske sahi Page par set kiya ja raha hai...</div>';
+    area.innerHTML = '<div style="text-align:center; padding:20px;">15-Line Quran Pages Load ho rahe hain...</div>';
 
     if(currentMode.includes('15line')) {
-        // --- 15-Line Page Mapping Logic ---
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`);
+        // --- 100% Image Based Solution (Indo-Pak 15 Lines) ---
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
         const data = await res.json();
-        const ayahs = data.data.ayahs;
         
+        // Quran.com API se pages ka pata lagana
+        const startPage = data.data.ayahs[0].page;
+        const endPage = data.data.ayahs[data.data.ayahs.length - 1].page;
+
         let pagesHtml = '';
-        let currentPageNum = ayahs[0].page;
-        let pageContent = '';
-
-        // Surah Header
-        pagesHtml += `
-            <div style="text-align: center; margin-bottom: 30px; padding: 20px; border: 4px double #064e3b; background: #f0fdf4; border-radius: 15px;">
-                <h1 style="font-family: 'Amiri'; font-size: 35px; color: #064e3b; margin:0;">${name}</h1>
-                <h2 style="font-family: 'Amiri'; font-size: 30px; margin-top: 10px;">بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ</h2>
-            </div>
-        `;
-
-        ayahs.forEach((a, index) => {
-            // Agar ayat ka page number badal gaya hai, toh purana page band karo aur naya shuru karo
-            if (a.page !== currentPageNum) {
-                pagesHtml += renderMushafPage(pageContent, currentPageNum);
-                pageContent = '';
-                currentPageNum = a.page;
-            }
+        for (let p = startPage; p <= endPage; p++) {
+            // Stable Global Image URL (No Blocking)
+            const imgUrl = `https://raw.githubusercontent.com/mushaf15/mushaf15-images/master/p${p}.png`;
             
-            pageContent += `${a.text} <span style="color: #d4af37; font-size: 20px;">﴿${a.numberInSurah}﴾</span> `;
-            
-            // Akhri ayat par page close karein
-            if (index === ayahs.length - 1) {
-                pagesHtml += renderMushafPage(pageContent, currentPageNum);
-            }
-        });
-
+            pagesHtml += `
+                <div class="mushaf-page" style="text-align: center; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <img src="${imgUrl}" style="width: 100%; max-width: 800px; display: block; margin: 0 auto;" 
+                         onerror="this.src='https://via.placeholder.com/500x800?text=Page+Loading...'">
+                    <p style="color: #666; font-size: 12px; margin-top: 10px;">Page ${p}</p>
+                </div>
+            `;
+        }
         area.innerHTML = pagesHtml;
 
     } else {
@@ -97,28 +85,29 @@ async function loadContent(id, name) {
     }
 }
 
-// Helper function to create the 15-line styled page
-function renderMushafPage(content, pageNum) {
-    return `
-        <div class="mushaf-page" style="background: #fff9e6; padding: 40px; margin: 25px auto; border: 12px double #064e3b; max-width: 800px; min-height: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); direction: rtl; position: relative;">
-            <div style="font-family: 'Amiri', serif; font-size: 28px; line-height: 2.5; text-align: justify; text-justify: inter-word; color: #000;">
-                ${content}
-            </div>
-            <div style="position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; color: #064e3b; font-weight: bold; font-size: 14px; border-top: 1px solid #d4af37; padding-top: 10px; margin: 0 40px;">
-                Page ${pageNum} - Ends Exactly as 15-Line Mushaf
-            </div>
-        </div>
-    `;
-}
-
 async function loadJuz(id) {
-    startApp('api-urdu'); 
-    loadContent(id, juzNames[id-1]);
-}
+    if(currentMode.includes('15line')) {
+        document.getElementById('surah-list').classList.add('hidden');
+        document.getElementById('juz-list').classList.add('hidden');
+        document.getElementById('viewer-section').classList.remove('hidden');
+        document.getElementById('current-title').innerText = juzNames[id-1];
+        const area = document.getElementById('content-area');
+        
+        const res = await fetch(`https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`);
+        const data = await res.json();
+        const startPage = data.data.ayahs[0].page;
+        const endPage = data.data.ayahs[data.data.ayahs.length - 1].page;
 
-function switchTab(t) {
-    document.getElementById('surah-list').classList.toggle('hidden', t==='juz');
-    document.getElementById('juz-list').classList.toggle('hidden', t==='surah');
+        let pagesHtml = '';
+        for (let p = startPage; p <= endPage; p++) {
+            const imgUrl = `https://raw.githubusercontent.com/mushaf15/mushaf15-images/master/p${p}.png`;
+            pagesHtml += `<div class="mushaf-page" style="margin-bottom:15px;"><img src="${imgUrl}" style="width:100%; max-width:800px;"></div>`;
+        }
+        area.innerHTML = pagesHtml;
+    } else {
+        startApp('api-urdu'); 
+        loadContent(id, juzNames[id-1]);
+    }
 }
 
 function backToList() {
